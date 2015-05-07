@@ -20,6 +20,9 @@ install:
   - mkdir $BUILD_PREFIX/lib
   - standard_install ffmpeg $FFMPEG_VERSION .tar.bz2 ffmpeg- --disable-doc --enable-shared --disable-static
   - ls $BUILD_PREFIX/lib
+  - pkg-config --cflags --libs libavformat
+  - pkg-config --cflags --libs libavcodec
+  - pkg-config --cflags --libs libavutil
   - pip install delocate cython
   - if [ -n "$BUILD_COMMIT" ]; then
         checkout_commit $REPO_DIR $BUILD_COMMIT;
