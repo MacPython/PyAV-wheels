@@ -16,8 +16,10 @@ install:
   - source terryfy/library_installers.sh
   - clean_builds
   - unset ARCH_FLAGS
-  - brew install yasm
+  - brew install yasm pkg-config
+  - mkdir $BUILD_PREFIX/lib
   - standard_install ffmpeg $FFMPEG_VERSION .tar.bz2 ffmpeg- --disable-doc --enable-shared --disable-static
+  - ls $BUILD_PREFIX/lib
   - pip install delocate cython
   - if [ -n "$BUILD_COMMIT" ]; then
         checkout_commit $REPO_DIR $BUILD_COMMIT;
