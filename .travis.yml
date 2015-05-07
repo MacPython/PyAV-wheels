@@ -16,12 +16,12 @@ install:
   - source terryfy/library_installers.sh
   - clean_builds
   - unset ARCH_FLAGS
-  - standard_install ffmpeg $FFMPEG_VERSION .tar.bz2 ffmpeg- --disable-doc --enable-shared
+  - standard_install ffmpeg $FFMPEG_VERSION .tar.bz2 ffmpeg- --disable-doc --enable-shared --disable-static
   - pip install delocate cython
   - if [ -n "$BUILD_COMMIT" ]; then
-        checkout_commit PyAV $BUILD_COMMIT;
+        checkout_commit $REPO_DIR $BUILD_COMMIT;
     fi
-  - cd PyAV
+  - cd $REPO_DIR
   - python setup.py bdist_wheel
   - delocate-listdeps dist/*.whl # lists library dependencies
   - delocate-wheel dist/*.whl # copies library dependencies into wheel
@@ -30,11 +30,14 @@ install:
   - cd ..
 script:
   # install dependencies for tests e.g - pip install nose
+  - pip install -r $REPO_DIR/tests/requirements.txt
   - mkdir tmp_for_test
   - cd tmp_for_test
+  - ln -s ../$REPO_DIR/tests
   # Run the tests
+  - nosetests tests
   - cd ..
-before_deploy: cd PyAV/dist
+before_deploy: cd $REPO_DIR/dist
 deploy:
   provider: cloudfiles
   username: travis-worker
