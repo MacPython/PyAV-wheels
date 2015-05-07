@@ -1,0 +1,45 @@
+language:
+- objective-c
+env:
+  global:
+  - BUILD_COMMIT='latest-tag'  # comment out to build version in submodule
+  - REPO_DIR=PyAV
+  - FFMPEG_VERSION=2.6.2
+  - LIBAV_VERSION=11.3
+  matrix:
+  - VERSION=2.7.9
+  - VERSION=3.3.5
+  - VERSION=3.4.3
+install:
+  - source terryfy/travis_tools.sh
+  - get_python_environment macpython $VERSION venv
+  - source terryfy/library_installers.sh
+  - clean_builds
+  - unset ARCH_FLAGS
+  - standard_install ffmpeg $FFMPEG_VERSION .tar.bz2 ffmpeg- --disable-doc --enable-shared
+  - pip install delocate cython
+  - if [ -n "$BUILD_COMMIT" ]; then
+        checkout_commit PyAV $BUILD_COMMIT;
+    fi
+  - cd PyAV
+  - python setup.py bdist_wheel
+  - delocate-listdeps dist/*.whl # lists library dependencies
+  - delocate-wheel dist/*.whl # copies library dependencies into wheel
+  - delocate-addplat --rm-orig -x 10_9 -x 10_10 dist/*.whl
+  - pip install dist/*.whl
+  - cd ..
+script:
+  # install dependencies for tests e.g - pip install nose
+  - mkdir tmp_for_test
+  - cd tmp_for_test
+  # Run the tests
+  - cd ..
+before_deploy: cd PyAV/dist
+deploy:
+  provider: cloudfiles
+  username: travis-worker
+  api_key:
+    secure: "XcVZGuoIlQgCvIvBaWBc688uD2QmioonWJy02wzlPCRxxKnrx4kS4RnidMmLrE/5m/4VMengZwdFjLmqqqvOqALlwja6ZnJgseYfDiby38svvKEBiwqKw+Ds4SAq3z2vKCcudcP7FUp2P8oAkekhVVY2QcEffSp2iJSI/Z7YBxn2wJMWv7tDkFd8qwiTFGv+ZBer/8oc5i3sFSU4Zw8uaehRzNsS0Sij8D/PyrwwyLlWiXKcOVZhUglAOLA5x+K9C9q8X+HIHDoWxWI1Wc2uCLWmf8YrzY5VVXNiRDSrjVw5Bp6w4uxV/zd9jYe/BLdAg8Q8brhbhLUvy7k5UK5SbsPqTCID6Azbi1BF7MHT1jSP7vqBV9pXrVJtaSH8KNHaV6rPh+BVBz7dxdqmCWQ/1Ig0OTfztEnmJvedznNiJoQIq2RdNnbpbmJUlZqCft2gGd5f5GVn5oESbHyqzKD6x29FI3iHbjL9eUzUxfGqmzgFss7w4SvqZi5qydYclcspnSSKfQ1udNHr8rSvCVSDG0dxXWAM7f72YRvY3nvlwFyKPmIqELBu0BkZwNlFedLs1prvBuxr+hIXjrydMMvdTWYU6fj3LY+tOfMvbD+kdDM0rzgMYckijrKdlxWQR1R963TFLbHBfRMGFQLuqt4TM+uNUct3UlLHHd5Isffw9j0="
+  region: ORD
+  container: wheels
+  skip_cleanup: true

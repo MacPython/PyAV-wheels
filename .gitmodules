@@ -1,0 +1,6 @@
+[submodule "PyAV"]
+	path = PyAV
+	url = https://github.com/mikeboers/PyAV
+[submodule "terryfy"]
+	path = terryfy
+	url = git://github.com/MacPython/terryfy.git
