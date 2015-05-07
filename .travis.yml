@@ -31,15 +31,17 @@ install:
   - delocate-wheel dist/*.whl # copies library dependencies into wheel
   - delocate-addplat --rm-orig -x 10_9 -x 10_10 dist/*.whl
   - pip install dist/*.whl
-  # Clean build products to make sure we are testing a clean install
-  - clean_builds
 script:
   # install dependencies for tests e.g - pip install nose
   - pip install -r tests/requirements.txt
   # Build files for testing
+  # Add built ffmpeg binaries to path
+  - export PATH="$PATH:$BUILD_PREFIX/bin"
   - make test-assets
   # Run tests in separate directory
   - cd $ROOT_DIR
+  # Clean build products to make sure we are testing a clean install
+  - clean_builds
   - mkdir tmp_for_test
   - cd tmp_for_test
   - ln -s $REPO_DIR/tests
