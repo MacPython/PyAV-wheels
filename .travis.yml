@@ -11,6 +11,8 @@ env:
   - VERSION=3.3.5
   - VERSION=3.4.3
 install:
+  - ROOT_DIR=$PWD
+  - REPO_DIR="$ROOT_DIR/$REPO_DIR"
   - source terryfy/travis_tools.sh
   - get_python_environment macpython $VERSION venv
   - source terryfy/library_installers.sh
@@ -29,15 +31,20 @@ install:
   - delocate-wheel dist/*.whl # copies library dependencies into wheel
   - delocate-addplat --rm-orig -x 10_9 -x 10_10 dist/*.whl
   - pip install dist/*.whl
-  - cd ..
+  # Clean build products to make sure we are testing a clean install
+  - clean_builds
 script:
   # install dependencies for tests e.g - pip install nose
-  - pip install -r $REPO_DIR/tests/requirements.txt
+  - pip install -r tests/requirements.txt
+  # Build files for testing
+  - make test-assets
+  # Run tests in separate directory
+  - cd $ROOT_DIR
   - mkdir tmp_for_test
   - cd tmp_for_test
-  - ln -s ../$REPO_DIR/tests
+  - ln -s $REPO_DIR/tests
   # Run the tests
-  # - nosetests tests
+  - nosetests tests
   - cd ..
 before_deploy: cd $REPO_DIR/dist
 deploy:
